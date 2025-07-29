@@ -1,0 +1,622 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Streaming com Barra Fixa</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* Reset e estilos globais */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        color: white;
+        /* Imagem de fundo com overlay escuro */
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+          url("imagem.jpg") no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+        /* Espaço para o cabeçalho fixo */
+        padding-top: 70px;
+      }
+
+      /* Estilos do cabeçalho FIXO */
+      header {
+        background-color: rgba(0, 0, 0, 0.9);
+        padding: 15px 4%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+      }
+
+      .header-left,
+      .header-right {
+        display: flex;
+        align-items: center;
+      }
+
+      .logo {
+        height: 40px;
+        margin-right: 30px;
+      }
+
+      .logo img {
+        height: 100%;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+      }
+
+      nav ul li {
+        margin-right: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+
+      nav ul li a:hover {
+        color: #e50914;
+      }
+
+      .header-right-icons {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .header-icon {
+        cursor: pointer;
+        color: white;
+        font-size: 18px;
+        transition: all 0.3s;
+        position: relative;
+      }
+
+      .header-icon:hover {
+        color: #e50914;
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #e50914;
+        color: white;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .profile-pic {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .profile-pic img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* Conteúdo principal */
+      main {
+        padding: 40px 5%;
+        position: relative;
+        z-index: 1;
+      }
+
+      .conteudo {
+        padding: 40px;
+        margin-right: auto;
+        width: 65%;
+        border-radius: 5px;
+        max-width: 800px;
+      }
+
+      /* Estilos para a seção de série */
+      .serie-destaque {
+        position: relative;
+      }
+
+      .serie-categoria {
+        color: #e50914;
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+
+      .serie-titulo {
+        font-size: 72px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: white;
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e50914,
+          0 0 30px #e50914, 0 0 40px #e50914;
+        position: relative;
+        z-index: 2;
+        animation: neon-glow 1.5s ease-in-out infinite alternate;
+      }
+
+      @keyframes neon-glow {
+        from {
+          text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e50914,
+            0 0 30px #e50914, 0 0 40px #e50914;
+        }
+        to {
+          text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e50914,
+            0 0 40px #e50914, 0 0 50px #e50914;
+        }
+      }
+
+      .serie-metadata {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #ccc;
+      }
+
+      .serie-descricao {
+        font-size: 18px;
+        line-height: 1.5;
+        margin-bottom: 25px;
+        max-width: 100%;
+      }
+
+      .serie-info {
+        font-size: 16px;
+        margin-bottom: 5px;
+      }
+
+      .serie-info span {
+        color: #e50914;
+        font-weight: bold;
+      }
+
+      /* Seções de filmes */
+      .secao-filmes {
+        margin-top: 50px;
+        width: 100%;
+      }
+
+      .secao-filmes h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: white;
+        font-weight: bold;
+        padding-left: 10px;
+      }
+
+      .carrossel-filmes {
+        display: flex;
+        gap: 15px;
+        overflow-x: auto;
+        padding: 10px;
+        scrollbar-width: thin;
+        scrollbar-color: #e50914 #333;
+      }
+
+      .carrossel-filmes::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .carrossel-filmes::-webkit-scrollbar-track {
+        background: #333;
+        border-radius: 10px;
+      }
+
+      .carrossel-filmes::-webkit-scrollbar-thumb {
+        background-color: #e50914;
+        border-radius: 10px;
+      }
+
+      .filme-card {
+        flex: 0 0 auto;
+        width: 200px;
+        border-radius: 5px;
+        overflow: hidden;
+        transition: transform 0.3s;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .filme-card:hover {
+        transform: scale(1.05);
+        z-index: 10;
+      }
+
+      .filme-card img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .filme-numero {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .filme-info {
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.8);
+      }
+
+      .filme-titulo {
+        font-size: 16px;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .filme-ano {
+        font-size: 14px;
+        color: #ccc;
+      }
+
+      /* Estilo específico para seção infantil */
+      .infantil .secao-filmes h2 {
+        color: #00b4ff;
+      }
+
+      .infantil .filme-card {
+        border: 2px solid transparent;
+      }
+
+      .infantil .filme-card:hover {
+        border-color: #00b4ff;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="logo">
+          <img src="pngwing.com (50).png" alt="Logomarca" />
+        </div>
+        <nav>
+          <ul>
+            <li><a href="#">Início</a></li>
+            <li><a href="#">Séries</a></li>
+            <li><a href="#">Filmes</a></li>
+            <li><a href="#">Bombando</a></li>
+            <li><a href="#">Minha Lista</a></li>
+            <li><a href="#">Navegar por Idiomas</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <div class="header-right-icons">
+          <div class="header-icon search-icon" title="Pesquisar">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="header-icon kids-icon" title="Modo Infantil">
+            <i class="fas fa-child"></i>
+          </div>
+          <div class="header-icon notification-icon" title="Notificações">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">3</span>
+          </div>
+          <div class="header-icon profile-icon">
+            <div class="profile-pic">
+              <img src="retrato.jpg" alt="Foto do perfil" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="conteudo">
+        <div class="serie-destaque">
+          <div class="serie-categoria">SÉRIE</div>
+          <h1 class="serie-titulo">STRANGER THINGS</h1>
+
+          <div class="serie-metadata">
+            <span>2016</span>
+            <span>|</span>
+            <span>A16</span>
+            <span>|</span>
+            <span>4 temporadas</span>
+            <span>|</span>
+            <span>Ficção científica</span>
+          </div>
+
+          <p class="serie-descricao">
+            Quando um garoto desaparece, a cidade toda participa nas buscas. Mas
+            o que encontram são segredos, forças sobrenaturais e uma menina.
+          </p>
+
+          <p class="serie-info">
+            <span>Estrelando:</span> Winona Ryder, David Harbour, Millie Bobby
+            Brown
+          </p>
+
+          <p class="serie-info"><span>Criação:</span> The Duffer Brothers</p>
+        </div>
+
+        <!-- Seção de filmes recentes -->
+        <div class="secao-filmes">
+          <h2>Filmes Recentes</h2>
+          <div class="carrossel-filmes">
+            <!-- Filme 1 -->
+            <div class="filme-card">
+              <div class="filme-numero">1</div>
+              <img
+                src="https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"
+                alt="Duna"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Duna: Parte Dois</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 2 -->
+            <div class="filme-card">
+              <div class="filme-numero">2</div>
+              <img
+                src="https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg"
+                alt="Oppenheimer"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Oppenheimer</div>
+                <div class="filme-ano">2023</div>
+              </div>
+            </div>
+
+            <!-- Filme 3 -->
+            <div class="filme-card">
+              <div class="filme-numero">3</div>
+              <img
+                src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
+                alt="Godzilla e Kong"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Godzilla e Kong: O Novo Império</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 4 -->
+            <div class="filme-card">
+              <div class="filme-numero">4</div>
+              <img
+                src="https://image.tmdb.org/t/p/w500/1XDDXPXGiI8id7MrUxK36ke7gkX.jpg"
+                alt="Deadpool"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Deadpool & Wolverine</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 5 -->
+            <div class="filme-card">
+              <div class="filme-numero">5</div>
+              <img
+                src="9f7ecfe88069f2dee0cc98d2eef7cd02a281b8a79df01e3a44a6547ed041e298.jpg"
+                alt="Furiosa"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Furiosa: Uma Saga Mad Max</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção para adultos -->
+        <div class="secao-filmes">
+          <h2>Para Adultos</h2>
+          <div class="carrossel-filmes">
+            <!-- Filme 1 -->
+            <div class="filme-card">
+              <img
+                src="https://image.tmdb.org/t/p/w500/5mzr6JZbrqnqD8rCEvPhuCE5Fw2.jpg"
+                alt="The Batman"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">The Batman - Parte II</div>
+                <div class="filme-ano">2025</div>
+              </div>
+            </div>
+
+            <!-- Filme 2 -->
+            <div class="filme-card">
+              <img
+                src="https://image.tmdb.org/t/p/w500/2Cpg8hUn60PK9CW9d5SWf605Ah8.jpg"
+                alt="A Quiet Place"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">A Quiet Place: Dia Um</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 3 -->
+            <div class="filme-card">
+              <img src=".jpg" alt="Planeta dos Macacos" />
+              <div class="filme-info">
+                <div class="filme-titulo">O Reino do Planeta dos Macacos</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 4 -->
+            <div class="filme-card">
+              <img
+                src="https://image.tmdb.org/t/p/w500/4MCKNAc6AbWjEsM2h9Xc29owo4z.jpg"
+                alt="Ghostbusters"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Ghostbusters: Império do Gelo</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 5 -->
+            <div class="filme-card">
+              <img
+                src="https://image.tmdb.org/t/p/w500/gavGnAMTXPkpoFgG0stwgIgKb64.jpg"
+                alt="Kung Fu Panda"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Kung Fu Panda 4</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção infantil -->
+        <div class="secao-filmes infantil">
+          <h2>Para Crianças</h2>
+          <div class="carrossel-filmes">
+            <!-- Filme 1 -->
+            <div class="filme-card">
+              <img src="d9023c99d6e.jpg" alt="Furiosa" />
+              <div class="filme-info">
+                <div class="filme-titulo">Frozen 3</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 2 -->
+            <div class="filme-card">
+              <img
+                src="https://image.tmdb.org/t/p/w500/gavGnAMTXPkpoFgG0stwgIgKb64.jpg"
+                alt="Kung Fu Panda"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Kung Fu Panda 4</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 3 -->
+            <div class="filme-card">
+              <img
+                src="https://image.tmdb.org/t/p/w500/4MCKNAc6AbWjEsM2h9Xc29owo4z.jpg"
+                alt="Ghostbusters"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Toy Story 5</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 4 -->
+            <div class="filme-card">
+              <img src="images (8).jpeg" alt="Planeta dos Macacos" />
+              <div class="filme-info">
+                <div class="filme-titulo">Minions 3</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+
+            <!-- Filme 5 -->
+            <div class="filme-card">
+              <img
+                src="https://image.tmdb.org/t/p/w500/2Cpg8hUn60PK9CW9d5SWf605Ah8.jpg"
+                alt="A Quiet Place"
+              />
+              <div class="filme-info">
+                <div class="filme-titulo">Super Pets 2</div>
+                <div class="filme-ano">2024</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Menu ativo
+        const menuItems = document.querySelectorAll("nav ul li a");
+        menuItems.forEach((item) => {
+          item.addEventListener("click", function () {
+            menuItems.forEach((i) => i.classList.remove("active"));
+            this.classList.add("active");
+          });
+        });
+
+        // Ícone de pesquisa
+        const searchIcon = document.querySelector(".search-icon");
+        searchIcon.addEventListener("click", function () {
+          alert("Barra de pesquisa será aberta");
+        });
+
+        // Ícone infantil
+        const kidsIcon = document.querySelector(".kids-icon");
+        kidsIcon.addEventListener("click", function () {
+          alert("Modo infantil ativado");
+        });
+
+        // Ícone de notificação
+        const notificationIcon = document.querySelector(".notification-icon");
+        notificationIcon.addEventListener("click", function () {
+          alert("Notificações serão exibidas");
+        });
+
+        // Ícone do perfil
+        const profileIcon = document.querySelector(".profile-icon");
+        profileIcon.addEventListener("click", function () {
+          alert("Menu do perfil será exibido");
+        });
+      });
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
